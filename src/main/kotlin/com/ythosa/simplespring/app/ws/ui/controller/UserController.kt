@@ -1,7 +1,12 @@
 package com.ythosa.simplespring.app.ws.ui.controller
 
+import com.ythosa.simplespring.app.ws.ui.model.request.UserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.response.UserRest
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("users")
@@ -17,18 +22,23 @@ class UserController {
     }
 
     @GetMapping("/{userId}")
-    fun getUser(@PathVariable userId: String): UserRest {
+    fun getUser(@PathVariable userId: String): ResponseEntity<UserRest> {
+        val response = UserRest.Builder()
+            .firstName("Ruslan")
+            .lastName("Babin")
+            .email("vasus714@yandex.ru")
+            .build()
+
+        return ResponseEntity<UserRest>(response, HttpStatus.OK)
+    }
+
+    @PostMapping
+    fun createUser(@Valid @RequestBody request: UserDetailsRequestModel): UserRest {
         return UserRest.Builder()
             .firstName("Ruslan")
             .lastName("Babin")
             .email("vasus714@yandex.ru")
-            .userId(userId)
             .build()
-    }
-
-    @PostMapping
-    fun createUser(): String {
-        return "create user was called"
     }
 
     @PutMapping
