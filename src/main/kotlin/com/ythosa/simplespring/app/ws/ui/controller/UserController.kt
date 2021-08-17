@@ -6,39 +6,44 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import java.util.*
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("users")
 class UserController {
+    private val users = mutableMapOf<String, UserRest>()
 
     @GetMapping
     fun getUsers(
         @RequestParam(value = "page", defaultValue = "1") page: Int,
         @RequestParam(value = "limit") limit: Int,
         @RequestParam(value = "sort", required = false) sort: String?
-    ): String {
-        return "get users was called with page=$page and limit=$limit and sort=${sort ?: "nope"}"
+    ): List<UserRest> {
+        return users.toList().map { it.second }
     }
 
     @GetMapping("/{userId}")
     fun getUser(@PathVariable userId: String): ResponseEntity<UserRest> {
-        val response = UserRest.Builder()
-            .firstName("Ruslan")
-            .lastName("Babin")
-            .email("vasus714@yandex.ru")
-            .build()
+        users[userId] ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
 
-        return ResponseEntity<UserRest>(response, HttpStatus.OK)
+        return ResponseEntity<UserRest>(users[userId], HttpStatus.OK)
     }
 
     @PostMapping
     fun createUser(@Valid @RequestBody request: UserDetailsRequestModel): UserRest {
-        return UserRest.Builder()
-            .firstName("Ruslan")
-            .lastName("Babin")
-            .email("vasus714@yandex.ru")
+        val userId = UUID.randomUUID().toString()
+        val user = UserRest.Builder()
+            .userId(userId)
+            .firstName(request.firstName!!)
+            .lastName(request.lastName!!)
+            .email(request.email!!)
             .build()
+
+        users[userId] = user
+
+        return user
     }
 
     @PutMapping
