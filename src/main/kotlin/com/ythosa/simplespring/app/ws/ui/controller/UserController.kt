@@ -1,13 +1,12 @@
 package com.ythosa.simplespring.app.ws.ui.controller
 
+import com.ythosa.simplespring.app.ws.exceptions.UserNotFoundException
 import com.ythosa.simplespring.app.ws.ui.model.request.UpdateUserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.request.UserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.response.UserRest
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 import java.util.*
 import javax.validation.Valid
 
@@ -27,7 +26,7 @@ class UserController {
 
     @GetMapping("/{userId}")
     fun getUser(@PathVariable userId: String): ResponseEntity<UserRest> {
-        users[userId] ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
+        users[userId] ?: throw UserNotFoundException()
 
         return ResponseEntity<UserRest>(users[userId], HttpStatus.OK)
     }
@@ -53,7 +52,7 @@ class UserController {
         @PathVariable userId: String,
         @Valid @RequestBody request: UpdateUserDetailsRequestModel
     ): UserRest {
-        val user = users[userId] ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
+        val user = users[userId] ?: throw UserNotFoundException()
 
         val updatedUser = UserRest.Builder()
             .userId(userId)
@@ -68,8 +67,12 @@ class UserController {
         return updatedUser
     }
 
-    @DeleteMapping
-    fun deleteUser(): String {
-        return "delete user was called"
+    @DeleteMapping("/{userId}")
+    fun deleteUser(@PathVariable userId: String): ResponseEntity<Void> {
+        users[userId] ?: throw UserNotFoundException()
+
+        users.remove(userId)
+
+        return ResponseEntity.ok().build()
     }
 }
