@@ -1,5 +1,6 @@
 package com.ythosa.simplespring.app.ws.ui.controller
 
+import com.ythosa.simplespring.app.ws.ui.model.request.UpdateUserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.request.UserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.response.UserRest
 import org.springframework.http.HttpStatus
@@ -39,6 +40,7 @@ class UserController {
             .firstName(request.firstName!!)
             .lastName(request.lastName!!)
             .email(request.email!!)
+            .password(request.password!!)
             .build()
 
         users[userId] = user
@@ -46,9 +48,24 @@ class UserController {
         return user
     }
 
-    @PutMapping
-    fun updateUser(): String {
-        return "update user was called"
+    @PutMapping("/{userId}")
+    fun updateUser(
+        @PathVariable userId: String,
+        @Valid @RequestBody request: UpdateUserDetailsRequestModel
+    ): UserRest {
+        val user = users[userId] ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
+
+        val updatedUser = UserRest.Builder()
+            .userId(userId)
+            .firstName(request.firstName ?: user.firstName!!)
+            .lastName(request.lastName ?: user.lastName!!)
+            .email(user.email!!)
+            .password(user.password!!)
+            .build()
+
+        users[userId] = updatedUser
+
+        return updatedUser
     }
 
     @DeleteMapping
