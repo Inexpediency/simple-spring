@@ -1,6 +1,7 @@
 package com.ythosa.simplespring.app.ws.userservice.impl
 
 import com.ythosa.simplespring.app.ws.exceptions.UserNotFoundException
+import com.ythosa.simplespring.app.ws.shared.Utils
 import com.ythosa.simplespring.app.ws.ui.model.request.UpdateUserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.request.UserDetailsRequestModel
 import com.ythosa.simplespring.app.ws.ui.model.response.UserRest
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class UserServiceImpl : UserService {
+class UserServiceImpl(val utils: Utils) : UserService {
     private val users = mutableMapOf<String, UserRest>()
     override fun getUsers(): List<UserRest> {
         return users.toList().map { it.second }
@@ -20,7 +21,7 @@ class UserServiceImpl : UserService {
     }
 
     override fun createUser(userDetails: UserDetailsRequestModel): UserRest {
-        val userId = UUID.randomUUID().toString()
+        val userId = this.utils.generateUUID()
         val user = UserRest.Builder()
             .userId(userId)
             .firstName(userDetails.firstName!!)
